@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luyện Tập So Sánh Tiếng Anh - Interactive Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Thư viện tạo file PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary-grad: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
+      --bg-grad: linear-gradient(135deg, #F0F4FF 0%, #FFF1F2 50%, #F5F3FF 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #1E1B4B;
+      --text-muted: #64748B;
+      --primary: #6366F1;
+      --success: #10B981;
+      --success-bg: #ECFDF5;
+      --error: #EF4444;
+      --error-bg: #FEF2F2;
+      --warning: #F59E0B;
+      --warning-bg: #FFFBEB;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    body {
+      background: var(--bg-grad);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 14px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 760px;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      border: 3px solid #EEF2FF;
+      position: relative;
+    }
+
+    /* Top Bar Header */
+    .app-header {
+      background: var(--primary-grad);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .app-title h1 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      font-weight: 600;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-badge {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .dropdown-select {
+      background: white;
+      color: var(--text-main);
+      border: 2px solid #C7D2FE;
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #E2E8F0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10B981, #06B6D4);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .main-body {
+      padding: 28px 24px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Form Nhập Tên */
+    .start-card {
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .mascot-icon {
+      font-size: 4rem;
+      margin-bottom: 12px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .start-card h2 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #4F46E5;
+      margin-bottom: 8px;
+    }
+
+    .start-card p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .input-field {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 20px auto;
+      text-align: left;
+    }
+
+    .input-field label {
+      display: block;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: 2.5px solid #CBD5E1;
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-field input:focus {
+      border-color: #6366F1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Buttons */
+    .btn-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--primary-grad);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-main:active {
+      transform: translateY(0);
+    }
+
+    /* Quiz Screen */
+    .section-badge {
+      display: inline-block;
+      background: #EEF2FF;
+      color: #4F46E5;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      border: 1px solid #C7D2FE;
+    }
+
+    .question-header {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    /* Option Choices (MCQ) */
+    .options-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      border: 2.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-item:hover {
+      border-color: #818CF8;
+      background: #F5F3FF;
+      transform: translateX(4px);
+    }
+
+    .option-item.selected {
+      border-color: #6366F1;
+      background: #EEF2FF;
+    }
+
+    .option-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: #E0E7FF;
+      color: #4338CA;
+      border-radius: 8px;
+      margin-right: 12px;
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    /* Fill-in Input */
+    .fill-box {
+      margin-bottom: 20px;
+    }
+
+    .fill-input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: 2.5px solid #CBD5E1;
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .fill-input:focus {
+      border-color: #6366F1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Theory & Hint Card */
+    .theory-card {
+      background: #F8FAFC;
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .theory-card-title {
+      font-weight: 800;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    /* Action Footer */
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-secondary {
+      padding: 12px 20px;
+      background: #F1F5F9;
+      color: #475569;
+      border: 2px solid #CBD5E1;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    /* Modal / Popups */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 24px;
+      background: white;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content.success-modal {
+      border-top: 8px solid var(--success);
+    }
+
+    .modal-content.error-modal {
+      border-top: 8px solid var(--error);
+    }
+
+    .modal-icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 22px;
+      text-align: left;
+      background: #F8FAFC;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+    }
+
+    /* Report Screen */
+    .report-card {
+      padding: 10px 0;
+    }
+
+    .report-hero {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .report-hero h2 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #4F46E5;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: #F8FAFC;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 8px;
+      text-align: center;
+    }
+
+    .stat-box.highlight-1 {
+      border-color: #C7D2FE;
+      background: #EEF2FF;
+      color: #4338CA;
+    }
+
+    .stat-box.highlight-2 {
+      border-color: #A7F3D0;
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .stat-box.highlight-3 {
+      border-color: #FECDD3;
+      background: #FFF1F2;
+      color: #9F1239;
+    }
+
+    .stat-val {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl {
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    th {
+      background: #F1F5F9;
+      color: #334155;
+      font-weight: 800;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) {
+      background: #F8FAFC;
+    }
+
+    .tag-wrong {
+      color: var(--error);
+      font-weight: 700;
+      background: #FEF2F2;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .tag-correct {
+      color: var(--success);
+      font-weight: 700;
+      background: #ECFDF5;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .sync-status {
+      font-size: 0.9rem;
+      color: #6366F1;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .report-btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #0284C7, #0369A1);
+    }
+
+    @media (max-width: 600px) {
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+      .app-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .nav-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .report-btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="app-title">
+      <h1>🌟 Luyện Tập So Sánh</h1>
+      <p id="studentDisplay">Chào mừng bạn đến với bài học!</p>
+    </div>
+    <div class="nav-controls" id="headerNav" style="display: none;">
+      <div class="progress-badge" id="progressBadge">Tiến độ: 0/60</div>
+      <select class="dropdown-select" id="questionDropdown" onchange="jumpToQuestion(this.value)">
+      </select>
+    </div>
+  </header>
+
+  <div class="progress-bar-container" id="progressBarWrapper" style="display: none;">
+    <div class="progress-bar-fill" id="progressBarFill"></div>
+  </div>
+
+  <div class="main-body">
+    <!-- SCREEN 1: BẮT ĐẦU -->
+    <div id="screen-start" class="screen active">
+      <div class="start-card">
+        <div class="mascot-icon">🚀</div>
+        <h2>Bắt Đầu Luyện Tập</h2>
+        <p>Thực hành kiến thức so sánh tính từ & trạng từ tiếng Anh</p>
+        <div class="input-field">
+          <label for="studentNameInput">Tên của học sinh:</label>
+          <input type="text" id="studentNameInput" placeholder="Nhập họ và tên..." autocomplete="off">
+        </div>
+        <button class="btn-main" onclick="startApp()">
+          Vào Làm Bài Ngay ⚡
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: BÀI TẬP -->
+    <div id="screen-quiz" class="screen">
+      <div class="section-badge" id="exerciseBadge">Bài tập</div>
+      <div class="question-header" id="questionTitle">Câu hỏi...</div>
+
+      <!-- Khu vực tương tác: MCQ hoặc Fill-in -->
+      <div id="interactionArea"></div>
+
+      <!-- Khung Lý Thuyết & Hướng Dẫn -->
+      <div class="theory-card">
+        <div class="theory-card-title">
+          <span>💡 Lý thuyết & Hướng làm bài:</span>
+        </div>
+        <div id="theoryContent">...</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="quiz-actions">
+        <button class="btn-secondary" id="btnPrev" onclick="navigatePrev()">⬅ Câu trước</button>
+        <button class="btn-main" id="btnCheck" onclick="checkCurrentAnswer()">Kiểm tra đáp án ✨</button>
+        <button class="btn-main" id="btnFinish" style="display: none; background: linear-gradient(135deg, #10B981, #059669);" onclick="showReportScreen()">Xem Báo Cáo 📊</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: BÁO CÁO TỔNG KẾT (Dùng để xuất PDF) -->
+    <div id="screen-report" class="screen">
+      <div class="report-card" id="pdfReportContent">
+        <div class="report-hero">
+          <div style="font-size: 3.5rem; margin-bottom: 8px;">🏆</div>
+          <h2 id="reportStudentName">Báo Cáo Kết Quả</h2>
+          <p style="color: var(--text-muted); font-weight: 700; margin-top: 4px;" id="reportTimestamp">Thời gian hoàn thành: --/--/----</p>
+          <div id="syncMsg" class="sync-status"></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-box highlight-1">
+            <div class="stat-val" id="statTotal">60</div>
+            <div class="stat-lbl">Tổng số câu đã làm</div>
+          </div>
+          <div class="stat-box highlight-2">
+            <div class="stat-val" id="statFirstCorrect">0</div>
+            <div class="stat-lbl">Đúng ngay lần đầu</div>
+          </div>
+          <div class="stat-box highlight-3">
+            <div class="stat-val" id="statNeedReview">0</div>
+            <div class="stat-lbl">Cần xem lại (sai ≥1 lần)</div>
+          </div>
+        </div>
+
+        <h3 style="font-weight: 900; margin-bottom: 12px; color: var(--text-main);">📋 Bảng đối chiếu chi tiết bài làm:</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 8%;">STT</th>
+                <th style="width: 42%;">Câu hỏi</th>
+                <th style="width: 25%;">Đáp án học sinh đã chọn</th>
+                <th style="width: 25%;">Đáp án chuẩn</th>
+              </tr>
+            </thead>
+            <tbody id="reportBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-btn-group">
+        <button class="btn-main btn-pdf" style="flex: 1;" onclick="exportToPDF()">📄 Xuất Báo Cáo PDF</button>
+        <button class="btn-main" style="flex: 1;" onclick="restartApp()">🔄 Làm Lại Từ Đầu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS POPUP MODAL -->
+<div class="modal-backdrop" id="successModal">
+  <div class="modal-content success-modal">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title" style="color: var(--success);">Chính Xác! Tuyệt Vời!</div>
+    <div class="modal-desc" id="successDesc">Giải thích đúng...</div>
+    <button class="btn-main" style="background: var(--success); width: 100%;" onclick="closeSuccessAndProceed()">
+      Tiếp tục câu tiếp theo ➡
+    </button>
+  </div>
+</div>
+
+<!-- ERROR POPUP MODAL -->
+<div class="modal-backdrop" id="errorModal">
+  <div class="modal-content error-modal">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title" style="color: var(--error);">Chưa Chính Xác Rồi!</div>
+    <div class="modal-desc" id="errorDesc">Phân tích lỗi sai...</div>
+    <button class="btn-main" style="background: var(--error); width: 100%;" onclick="closeErrorAndRetry()">
+      Thử lại ngay nào 🔁
+    </button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   CẤU HÌNH LIÊN KẾT GOOGLE APPS SCRIPT:
+   Dán URL Web App bạn copy từ Apps Script vào giữa hai dấu ngoặc kép bên dưới:
+   ========================================================================= */
+const APPS_SCRIPT_URL = "DÁN_URL_APPS_SCRIPT_TẠI_ĐÂY";
+
+/* =========================================================================
+   1. TOÀN BỘ 60 CÂU HỎI - ĐÃ LỌC SẠCH GỢI Ý ĐÁP ÁN (CHỈ NÊU QUY TẮC/HƯỚNG DẪN)
+   ========================================================================= */
+const allQuestions = [
+  // --- Part 1: Trắc nghiệm 16 -> 30 ---
+  {
+    id: 1,
+    section: "Trắc nghiệm 16-30",
+    text: "16. It is _______ in the city than it is in the country.",
+    type: "mcq",
+    options: ["A. noisily", "B. more noisier", "C. noisier", "D. noisy"],
+    answer: "C. noisier",
+    cleanAnswer: "noisier",
+    theory: "Sau động từ to be 'is' và có từ 'than' -> Cần so sánh hơn của tính từ 2 âm tiết có đuôi tận cùng là '-y'.",
+    whyWrong: "Chú ý: Tính từ 2 âm tiết tận cùng là 'y' áp dụng quy tắc đổi 'y' thành 'i' rồi thêm '-er'. Không kết hợp cả 'more' lẫn đuôi '-er'.",
+    whyRight: "'noisy' là tính từ tận cùng 'y' chuyển thành 'noisier'."
+  },
+  {
+    id: 2,
+    section: "Trắc nghiệm 16-30",
+    text: "17. The English test was _______ than I thought it would be.",
+    type: "mcq",
+    options: ["A. the easier", "B. more easy", "C. easiest", "D. easier"],
+    answer: "D. easier",
+    cleanAnswer: "easier",
+    theory: "Có dấu hiệu 'than' -> Cần dùng dạng so sánh hơn của tính từ có tận cùng bằng đuôi '-y'.",
+    whyWrong: "Tính từ tận cùng bằng 'y' áp dụng quy tắc thêm đuôi so sánh hơn của tính từ ngắn, không dùng 'more'.",
+    whyRight: "'easy' đổi thành 'easier' trong so sánh hơn."
+  },
+  {
+    id: 3,
+    section: "Trắc nghiệm 16-30",
+    text: "18. English is thought to be _______ than Math.",
+    type: "mcq",
+    options: ["A. harder", "B. the more hard", "C. hardest", "D. the hardest"],
+    answer: "A. harder",
+    cleanAnswer: "harder",
+    theory: "Phía sau có 'than' -> Cần dạng so sánh hơn của tính từ ngắn 1 âm tiết.",
+    whyWrong: "Tính từ ngắn 1 âm tiết chỉ cần thêm đuôi '-er' phía sau, không dùng 'the' hay dạng so sánh nhất.",
+    whyRight: "Tính từ ngắn 'hard' thêm '-er' -> 'harder'."
+  },
+  {
+    id: 4,
+    section: "Trắc nghiệm 16-30",
+    text: "19. Her office is _______ away than mine.",
+    type: "mcq",
+    options: ["A. father", "B. more far", "C. farther", "D. farer"],
+    answer: "C. farther",
+    cleanAnswer: "farther",
+    theory: "Từ chỉ khoảng cách 'far' là từ bất quy tắc khi chuyển sang dạng so sánh hơn.",
+    whyWrong: "Từ 'far' biến đổi dạng đặc biệt khi so sánh hơn, chú ý phân biệt với danh từ 'father' (người cha).",
+    whyRight: "Dạng so sánh hơn bất quy tắc của 'far' là 'farther'."
+  },
+  {
+    id: 5,
+    section: "Trắc nghiệm 16-30",
+    text: "20. The streets in cities are _______ than those in the countryside.",
+    type: "mcq",
+    options: ["A. crowded", "B. more crowded", "C. crowdeder", "D. less crowded"],
+    answer: "B. more crowded",
+    cleanAnswer: "more crowded",
+    theory: "Tính từ dài (2 âm tiết trở lên) trong cấu trúc so sánh hơn với 'than' cần thêm từ bổ trợ phía trước tính từ.",
+    whyWrong: "'crowded' là tính từ dài, cấu trúc đúng là 'more + tính từ dài', không gắn đuôi '-er'.",
+    whyRight: "Tính từ dài dùng 'more crowded'."
+  },
+  {
+    id: 6,
+    section: "Trắc nghiệm 16-30",
+    text: "21. City drivers have to drive _______ than country ones.",
+    type: "mcq",
+    options: ["A. more careful", "B. more careless", "C. more carefully", "D. more carelessly"],
+    answer: "C. more carefully",
+    cleanAnswer: "more carefully",
+    theory: "Bổ nghĩa cho động từ hành động ('drive') cần dùng trạng từ có đuôi '-ly' ở dạng so sánh hơn.",
+    whyWrong: "Động từ thường cần trạng từ bổ nghĩa (không dùng tính từ) và xét về ngữ nghĩa nơi đông đúc cần lái xe cẩn thận hơn.",
+    whyRight: "Động từ 'drive' đi với trạng từ 'more carefully'."
+  },
+  {
+    id: 7,
+    section: "Trắc nghiệm 16-30",
+    text: "22. My house is _______ hers.",
+    type: "mcq",
+    options: ["A. cheap than", "B. cheaper", "C. more cheap than", "D. cheaper than"],
+    answer: "D. cheaper than",
+    cleanAnswer: "cheaper than",
+    theory: "So sánh hơn của tính từ ngắn 1 âm tiết và cần có liên từ so sánh đi kèm trước tân ngữ.",
+    whyWrong: "Cần đảm bảo cả 2 yếu tố: tính từ ngắn thêm đuôi '-er' và liên từ so sánh 'than' nối với vế sau.",
+    whyRight: "Đầy đủ cấu trúc là 'cheaper than'."
+  },
+  {
+    id: 8,
+    section: "Trắc nghiệm 16-30",
+    text: "23. Tom is _______ than David.",
+    type: "mcq",
+    options: ["A. handsome", "B. the more handsome", "C. more handsome", "D. the most handsome"],
+    answer: "C. more handsome",
+    cleanAnswer: "more handsome",
+    theory: "Áp dụng công thức so sánh hơn cho tính từ dài 2 âm tiết khi đứng trước 'than'.",
+    whyWrong: "So sánh hơn tính từ dài dùng 'more + adj + than', không dùng mạo từ 'the'.",
+    whyRight: "Tính từ dài dùng 'more handsome'."
+  },
+  {
+    id: 9,
+    section: "Trắc nghiệm 16-30",
+    text: "24. He did the test _______ I did.",
+    type: "mcq",
+    options: ["A. as bad as", "B. badder than", "C. more badly than", "D. worse than"],
+    answer: "D. worse than",
+    cleanAnswer: "worse than",
+    theory: "Dạng so sánh hơn bất quy tắc của từ 'bad / badly' khi có 'than'.",
+    whyWrong: "'bad / badly' biến đổi đặc biệt ở cấp so sánh hơn, không thêm '-er' hay 'more'.",
+    whyRight: "So sánh hơn của 'badly' là 'worse than'."
+  },
+  {
+    id: 10,
+    section: "Trắc nghiệm 16-30",
+    text: "25. My new sofa is _______ than the old one.",
+    type: "mcq",
+    options: ["A. more comfortable", "B. comfortably", "C. more comfortabler", "D. comfortable"],
+    answer: "A. more comfortable",
+    cleanAnswer: "more comfortable",
+    theory: "Sau động từ to be 'is' và có 'than' -> Cần dạng so sánh hơn của tính từ dài 3 âm tiết.",
+    whyWrong: "Tính từ dài chỉ cần thêm từ 'more' ở đằng trước, không thêm đuôi '-er'.",
+    whyRight: "Tính từ dài dùng 'more comfortable'."
+  },
+  {
+    id: 11,
+    section: "Trắc nghiệm 16-30",
+    text: "26. A boat is _______ than a plane.",
+    type: "mcq",
+    options: ["A. slower", "B. slowest", "C. more slow", "D. more slower"],
+    answer: "A. slower",
+    cleanAnswer: "slower",
+    theory: "So sánh hơn tính từ ngắn 1 âm tiết kết hợp với 'than'.",
+    whyWrong: "Tính từ ngắn 1 âm tiết thêm đuôi '-er', không dùng 'more'.",
+    whyRight: "Tính từ ngắn 'slow' -> 'slower'."
+  },
+  {
+    id: 12,
+    section: "Trắc nghiệm 16-30",
+    text: "27. My sister dances _______ than me.",
+    type: "mcq",
+    options: ["A. gooder", "B. weller", "C. better", "D. more good"],
+    answer: "C. better",
+    cleanAnswer: "better",
+    theory: "Bổ nghĩa cho động từ 'dances' cần dạng so sánh hơn bất quy tắc của trạng từ 'well'.",
+    whyWrong: "Trạng từ 'well' biến đổi đặc biệt ở dạng so sánh hơn, không dùng đuôi '-er'.",
+    whyRight: "Dạng so sánh hơn của 'well' là 'better'."
+  },
+  {
+    id: 13,
+    section: "Trắc nghiệm 16-30",
+    text: "28. This road is _______ than that road.",
+    type: "mcq",
+    options: ["A. narrower", "B. narrow", "C. the most narrow", "D. more narrower"],
+    answer: "A. narrower",
+    cleanAnswer: "narrower",
+    theory: "Tính từ 2 âm tiết có đuôi tận cùng bằng '-ow' áp dụng quy tắc so sánh như tính từ ngắn.",
+    whyWrong: "Tính từ có đuôi '-ow' thêm đuôi '-er', không đi kèm 'more'.",
+    whyRight: "Tính từ có đuôi '-ow' -> 'narrower'."
+  },
+  {
+    id: 14,
+    section: "Trắc nghiệm 16-30",
+    text: "29. He drives _______ his brother.",
+    type: "mcq",
+    options: ["A. more careful than", "B. more carefully", "C. more carefully than", "D. as careful as"],
+    answer: "C. more carefully than",
+    cleanAnswer: "more carefully than",
+    theory: "Động từ 'drives' cần trạng từ đuôi '-ly' và liên từ so sánh đi kèm.",
+    whyWrong: "Cần dùng trạng từ bổ nghĩa cho hành động 'drive' kèm theo liên từ 'than'.",
+    whyRight: "Đầy đủ dạng trạng từ so sánh hơn là 'more carefully than'."
+  },
+  {
+    id: 15,
+    section: "Trắc nghiệm 16-30",
+    text: "30. Things in the city are _______ than in the country.",
+    type: "mcq",
+    options: ["A. moderner", "B. more moderner", "C. modern", "D. more modern"],
+    answer: "D. more modern",
+    cleanAnswer: "more modern",
+    theory: "So sánh hơn của tính từ 2 âm tiết thông thường không có đuôi đặc biệt.",
+    whyWrong: "Tính từ 2 âm tiết thông thường đi với 'more', không thêm đuôi '-er'.",
+    whyRight: "Tính từ dài dùng 'more modern'."
+  },
+
+  // --- Exercise 5: Chọn đáp án đúng (1 - 10) ---
+  {
+    id: 16,
+    section: "Exercise 5: Circle correct option",
+    text: "1. City people seem to react [quicklier / more quickly] to changes than countryside people.",
+    type: "mcq",
+    options: ["quicklier", "more quickly"],
+    answer: "more quickly",
+    cleanAnswer: "more quickly",
+    theory: "Quy tắc tạo so sánh hơn cho trạng từ có đuôi '-ly'.",
+    whyWrong: "Trạng từ có hậu tố '-ly' tạo so sánh hơn bằng cách thêm từ bổ trợ 'more' ở trước.",
+    whyRight: "Trạng từ đuôi '-ly' dùng 'more quickly'."
+  },
+  {
+    id: 17,
+    section: "Exercise 5: Circle correct option",
+    text: "2. She came to the party [later / more lately] than her friends.",
+    type: "mcq",
+    options: ["later", "more lately"],
+    answer: "later",
+    cleanAnswer: "later",
+    theory: "Dạng so sánh hơn của từ chỉ thời gian 'late'.",
+    whyWrong: "'late' là trạng từ ngắn chỉ thời gian trễ/muộn, dạng so sánh hơn thêm đuôi '-er'.",
+    whyRight: "So sánh hơn của 'late' là 'later'."
+  },
+  {
+    id: 18,
+    section: "Exercise 5: Circle correct option",
+    text: "3. Does a computer work at calculus [more fast / faster] than a human being?",
+    type: "mcq",
+    options: ["more fast", "faster"],
+    answer: "faster",
+    cleanAnswer: "faster",
+    theory: "Quy tắc so sánh hơn của trạng từ ngắn 1 âm tiết.",
+    whyWrong: "'fast' là trạng từ ngắn 1 âm tiết nên áp dụng quy tắc thêm đuôi '-er'.",
+    whyRight: "Trạng từ ngắn thêm '-er' -> 'faster'."
+  },
+  {
+    id: 19,
+    section: "Exercise 5: Circle correct option",
+    text: "4. Nga writes English essays [better / more well] than Mai.",
+    type: "mcq",
+    options: ["better", "more well"],
+    answer: "better",
+    cleanAnswer: "better",
+    theory: "Dạng so sánh hơn bất quy tắc của trạng từ 'well'.",
+    whyWrong: "'well' có dạng biến đổi đặc biệt khi so sánh hơn, không dùng 'more well'.",
+    whyRight: "Trạng từ 'well' biến đổi thành 'better'."
+  },
+  {
+    id: 20,
+    section: "Exercise 5: Circle correct option",
+    text: "5. Nick can jump [higher / more high] than Mike.",
+    type: "mcq",
+    options: ["higher", "more high"],
+    answer: "higher",
+    cleanAnswer: "higher",
+    theory: "Quy tắc so sánh hơn của từ ngắn 1 âm tiết.",
+    whyWrong: "Từ 1 âm tiết ngắn tạo so sánh hơn bằng cách thêm đuôi '-er'.",
+    whyRight: "Từ ngắn thêm '-er' -> 'higher'."
+  },
+  {
+    id: 21,
+    section: "Exercise 5: Circle correct option",
+    text: "6. Today it’s raining [more heavily / heavilier] than it was yesterday.",
+    type: "mcq",
+    options: ["more heavily", "heavilier"],
+    answer: "more heavily",
+    cleanAnswer: "more heavily",
+    theory: "Quy tắc so sánh hơn cho trạng từ có đuôi '-ly'.",
+    whyWrong: "Trạng từ cấu tạo bằng đuôi '-ly' giữ nguyên từ gốc và thêm 'more' phía trước.",
+    whyRight: "Trạng từ đuôi '-ly' dùng 'more heavily'."
+  },
+  {
+    id: 22,
+    section: "Exercise 5: Circle correct option",
+    text: "7. Juice contains [more / many] vitamins than coke.",
+    type: "mcq",
+    options: ["more", "many"],
+    answer: "more",
+    cleanAnswer: "more",
+    theory: "Xác định dạng từ cần điền khi câu có liên từ so sánh 'than'.",
+    whyWrong: "Có 'than' nên từ chỉ số lượng phải chuyển sang dạng so sánh hơn.",
+    whyRight: "Dạng so sánh hơn của 'many' là 'more'."
+  },
+  {
+    id: 23,
+    section: "Exercise 5: Circle correct option",
+    text: "8. The farmers in my village work [hard / harder] than the ones here.",
+    type: "mcq",
+    options: ["hard", "harder"],
+    answer: "harder",
+    cleanAnswer: "harder",
+    theory: "Dấu hiệu 'than' yêu cầu trạng từ phải ở cấp độ so sánh hơn.",
+    whyWrong: "Cần chuyển trạng từ ngắn 1 âm tiết sang dạng so sánh hơn khi có 'than'.",
+    whyRight: "Trạng từ ngắn thêm '-er' -> 'harder'."
+  },
+  {
+    id: 24,
+    section: "Exercise 5: Circle correct option",
+    text: "9. People in rural areas talk [optimistically / more optimistically] than city people.",
+    type: "mcq",
+    options: ["optimistically", "more optimistically"],
+    answer: "more optimistically",
+    cleanAnswer: "more optimistically",
+    theory: "Quy tắc so sánh hơn của trạng từ nhiều âm tiết với liên từ 'than'.",
+    whyWrong: "So sánh hơn của trạng từ nhiều âm tiết cần thêm từ bổ trợ trước trạng từ.",
+    whyRight: "Trạng từ dài dùng 'more optimistically'."
+  },
+  {
+    id: 25,
+    section: "Exercise 5: Circle correct option",
+    text: "10. Ms. Sarah dances [more beautifully / beautifully] than Ms. Susan.",
+    type: "mcq",
+    options: ["more beautifully", "beautifully"],
+    answer: "more beautifully",
+    cleanAnswer: "more beautifully",
+    theory: "Cấu trúc so sánh hơn giữa 2 đối tượng thực hiện hành động với 'than'.",
+    whyWrong: "Có liên từ so sánh 'than' nên trạng từ phải ở dạng so sánh hơn.",
+    whyRight: "Trạng từ đuôi '-ly' dùng 'more beautifully'."
+  },
+
+  // --- Exercise 7: Điền dạng so sánh hơn của trạng từ (1 - 8) ---
+  {
+    id: 26,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "1. It usually rains ___________________ in Central Viet Nam than in other region. (heavy)",
+    type: "fill",
+    answer: "more heavily",
+    cleanAnswer: "more heavily",
+    theory: "Bước 1: Đổi tính từ trong ngoặc sang trạng từ đuôi '-ly'. Bước 2: Áp dụng công thức so sánh hơn của trạng từ đuôi '-ly'.",
+    whyWrong: "Động từ 'rains' cần trạng từ bổ nghĩa, sau đó áp dụng quy tắc so sánh hơn của trạng từ đuôi '-ly'.",
+    whyRight: "Trạng từ chuyển đổi là 'more heavily'."
+  },
+  {
+    id: 27,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "2. I will have to try a bit ___________________ than this. (hard)",
+    type: "fill",
+    answer: "harder",
+    cleanAnswer: "harder",
+    theory: "Xác định trạng từ của từ trong ngoặc (từ ngắn 1 âm tiết giữ nguyên dạng) -> Thêm đuôi so sánh hơn phù hợp.",
+    whyWrong: "'hard' là trạng từ ngắn 1 âm tiết, áp dụng quy tắc thêm đuôi so sánh hơn của từ ngắn.",
+    whyRight: "Trạng từ ngắn thêm '-er' -> 'harder'."
+  },
+  {
+    id: 28,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "3. The hall was lighted ___________________ than the corridors. (bright)",
+    type: "fill",
+    answer: "more brightly",
+    cleanAnswer: "more brightly",
+    theory: "Chuyển tính từ sang trạng từ cách thức (thêm '-ly') -> Áp dụng công thức so sánh hơn trạng từ nhiều âm tiết.",
+    whyWrong: "Bổ nghĩa cho động từ 'lighted' cần trạng từ đuôi '-ly' ở dạng so sánh hơn.",
+    whyRight: "Trạng từ đúng là 'more brightly'."
+  },
+  {
+    id: 29,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "4. Time goes by ___________________ when we are busy. (quick)",
+    type: "fill",
+    answer: "more quickly",
+    cleanAnswer: "more quickly",
+    theory: "Bổ nghĩa cho cụm động từ 'goes by' cần trạng từ đuôi '-ly' ở dạng so sánh hơn.",
+    whyWrong: "Chuyển tính từ thành trạng từ đuôi '-ly' rồi thêm từ bổ trợ so sánh hơn ở trước.",
+    whyRight: "Trạng từ so sánh hơn là 'more quickly'."
+  },
+  {
+    id: 30,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "5. Our family has lived ___________________ in the country than in the town since last year. (happy)",
+    type: "fill",
+    answer: "more happily",
+    cleanAnswer: "more happily",
+    theory: "Chuyển tính từ có tận cùng bằng '-y' sang trạng từ (đổi y -> i + ly) -> Thêm từ so sánh hơn phía trước.",
+    whyWrong: "Động từ 'lived' đi với trạng từ cách thức đuôi '-ly' ở cấp so sánh hơn.",
+    whyRight: "Trạng từ chuyển đổi đúng là 'more happily'."
+  },
+  {
+    id: 31,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "6. The boys were playing the game ___________________ than the girls. (noisy)",
+    type: "fill",
+    answer: "more noisily",
+    cleanAnswer: "more noisily",
+    theory: "Chuyển tính từ trong ngoặc sang trạng từ tương ứng -> Áp dụng quy tắc so sánh hơn với trạng từ đuôi '-ly'.",
+    whyWrong: "Bổ nghĩa cho hành động 'playing' cần trạng từ đuôi '-ly' dạng so sánh hơn.",
+    whyRight: "Trạng từ so sánh hơn là 'more noisily'."
+  },
+  {
+    id: 32,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "7. This task can be completed ___________________ than that one. (easy)",
+    type: "fill",
+    answer: "more easily",
+    cleanAnswer: "more easily",
+    theory: "Chuyển tính từ sang trạng từ đuôi '-ly' -> Áp dụng cấu trúc so sánh hơn của trạng từ.",
+    whyWrong: "Bổ nghĩa cho dạng bị động 'be completed' cần trạng từ đuôi '-ly' dạng so sánh hơn.",
+    whyRight: "Trạng từ đúng là 'more easily'."
+  },
+  {
+    id: 33,
+    section: "Exercise 7: Comparative Adverbs",
+    text: "8. A tractor can plough ___________________ than a buffalo or a horse. (good)",
+    type: "fill",
+    answer: "better",
+    cleanAnswer: "better",
+    theory: "Xác định trạng từ tương ứng của tính từ trong ngoặc -> Chuyển sang dạng so sánh hơn bất quy tắc.",
+    whyWrong: "Tính từ 'good' có trạng từ tương ứng là 'well', trạng từ này biến đổi đặc biệt ở dạng so sánh hơn.",
+    whyRight: "Dạng so sánh hơn bất quy tắc là 'better'."
+  },
+
+  // --- Exercise 8: Dạng so sánh của tính từ (1 - 10) ---
+  {
+    id: 34,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "1. Tea is ___________________ coffee. (cheap)",
+    type: "fill",
+    answer: "cheaper than",
+    cleanAnswer: "cheaper than",
+    theory: "Áp dụng quy tắc so sánh hơn cho tính từ ngắn 1 âm tiết. Lưu ý kiểm tra xem câu đã có từ nối so sánh chưa.",
+    whyWrong: "Tính từ 1 âm tiết thêm đuôi so sánh hơn và cần bổ sung thêm liên từ 'than' vì đề bài chưa có.",
+    whyRight: "Cấu trúc hoàn chỉnh là 'cheaper than'."
+  },
+  {
+    id: 35,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "2. The new harvest machine is ___________________ than the old one. (effective)",
+    type: "fill",
+    answer: "more effective",
+    cleanAnswer: "more effective",
+    theory: "So sánh hơn tính từ dài nhiều âm tiết khi câu đã có sẵn từ nối 'than'.",
+    whyWrong: "Tính từ 3 âm tiết thuộc nhóm tính từ dài, thêm từ bổ trợ so sánh hơn ở đằng trước.",
+    whyRight: "Tính từ dài dùng 'more effective'."
+  },
+  {
+    id: 36,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "3. The countryside is ___________________ the town. (beautiful)",
+    type: "fill",
+    answer: "more beautiful than",
+    cleanAnswer: "more beautiful than",
+    theory: "Áp dụng công thức so sánh hơn tính từ dài. Chú ý điền đầy đủ cả liên từ so sánh nếu câu chưa có.",
+    whyWrong: "Cần cấu trúc so sánh hơn của tính từ dài kèm theo liên từ 'than' nối với vế sau.",
+    whyRight: "Đầy đủ cấu trúc là 'more beautiful than'."
+  },
+  {
+    id: 37,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "4. A tractor is ___________________ a buffalo. (powerful)",
+    type: "fill",
+    answer: "more powerful than",
+    cleanAnswer: "more powerful than",
+    theory: "So sánh hơn tính từ dài và thêm liên từ nối 2 đối tượng so sánh.",
+    whyWrong: "Tính từ nhiều âm tiết đi với từ so sánh hơn ở trước và liên từ nối ở sau.",
+    whyRight: "Cấu trúc đúng là 'more powerful than'."
+  },
+  {
+    id: 38,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "5. My sister is ___________________ me. (tall)",
+    type: "fill",
+    answer: "taller than",
+    cleanAnswer: "taller than",
+    theory: "So sánh hơn tính từ ngắn 1 âm tiết kèm liên từ so sánh trước tân ngữ.",
+    whyWrong: "Tính từ ngắn thêm đuôi '-er' kèm theo liên từ 'than'.",
+    whyRight: "Cấu trúc hoàn chỉnh là 'taller than'."
+  },
+  {
+    id: 39,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "6. Blue whales are ___________________ elephants. (heavy)",
+    type: "fill",
+    answer: "heavier than",
+    cleanAnswer: "heavier than",
+    theory: "Tính từ 2 âm tiết có đuôi tận cùng bằng '-y' áp dụng quy tắc biến đổi của tính từ ngắn + liên từ so sánh.",
+    whyWrong: "Đổi đuôi 'y' thành 'i' rồi thêm '-er' kèm theo liên từ 'than'.",
+    whyRight: "Dạng đúng là 'heavier than'."
+  },
+  {
+    id: 40,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "7. The Mekong River is ___________________ the Red River. (long)",
+    type: "fill",
+    answer: "longer than",
+    cleanAnswer: "longer than",
+    theory: "Quy tắc so sánh hơn tính từ ngắn 1 âm tiết và thêm liên từ nối.",
+    whyWrong: "Tính từ ngắn thêm đuôi '-er' và bổ sung liên từ 'than'.",
+    whyRight: "Dạng đúng là 'longer than'."
+  },
+  {
+    id: 41,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "8. Do you think English is ___________________ French in grammar? (easy)",
+    type: "fill",
+    answer: "easier than",
+    cleanAnswer: "easier than",
+    theory: "Tính từ tận cùng bằng '-y' áp dụng quy tắc biến đổi đuôi khi so sánh hơn + liên từ so sánh.",
+    whyWrong: "Tính từ tận cùng là 'y' đổi thành 'i' rồi thêm đuôi so sánh hơn, kèm theo liên từ 'than'.",
+    whyRight: "Dạng đúng là 'easier than'."
+  },
+  {
+    id: 42,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "9. My new bed is ___________________ my old bed. (comfortable)",
+    type: "fill",
+    answer: "more comfortable than",
+    cleanAnswer: "more comfortable than",
+    theory: "So sánh hơn tính từ dài nhiều âm tiết kết hợp liên từ nối 2 vật thể.",
+    whyWrong: "Tính từ dài cần từ bổ trợ so sánh hơn ở trước và liên từ 'than' ở sau.",
+    whyRight: "Dạng đúng là 'more comfortable than'."
+  },
+  {
+    id: 43,
+    section: "Exercise 8: Comparative Adjectives",
+    text: "10. The film about my village town is ___________________ the book. (interesting)",
+    type: "fill",
+    answer: "more interesting than",
+    cleanAnswer: "more interesting than",
+    theory: "Quy tắc so sánh hơn tính từ dài nhiều âm tiết + liên từ nối.",
+    whyWrong: "Cần dùng từ so sánh hơn trước tính từ dài và thêm liên từ 'than'.",
+    whyRight: "Dạng đúng là 'more interesting than'."
+  },
+
+  // --- Exercise 2: Viết lại câu với dạng thích hợp của trạng từ (1 - 5) ---
+  {
+    id: 44,
+    section: "Exercise 2: Adverb Sentence Transformation",
+    text: "1. Nick is a careful writer than Phuc. (carefully)<br>➔ Nick writes essays ___________________",
+    type: "fill",
+    answer: "more carefully than Phuc",
+    cleanAnswer: "more carefully than phuc",
+    theory: "Chuyển câu từ dạng tính từ sang động từ hành động + trạng từ so sánh hơn + đối tượng so sánh.",
+    whyWrong: "Bổ nghĩa cho động từ 'writes' cần trạng từ đuôi '-ly' dạng so sánh hơn nối với đối tượng so sánh.",
+    whyRight: "Cụm từ hoàn chỉnh là 'more carefully than Phuc'."
+  },
+  {
+    id: 45,
+    section: "Exercise 2: Adverb Sentence Transformation",
+    text: "2. A snail is slower than a crab. (slowly)<br>➔ A snail moves ___________________",
+    type: "fill",
+    answer: "more slowly than a crab",
+    cleanAnswer: "more slowly than a crab",
+    theory: "Chuyển tính từ so sánh sang trạng từ so sánh hơn bổ nghĩa cho động từ di chuyển ('moves').",
+    whyWrong: "Động từ 'moves' đi với trạng từ so sánh hơn của từ trong ngoặc + liên từ nối đối tượng.",
+    whyRight: "Cụm từ hoàn chỉnh là 'more slowly than a crab'."
+  },
+  {
+    id: 46,
+    section: "Exercise 2: Adverb Sentence Transformation",
+    text: "3. My father’s explanation about the subject was clearer than my brother’s. (clearly)<br>➔ My father explained the subject ___________________",
+    type: "fill",
+    answer: "more clearly than my brother",
+    cleanAnswer: "more clearly than my brother",
+    theory: "Chuyển đổi câu sang động từ 'explained' + trạng từ so sánh hơn + đối tượng.",
+    whyWrong: "Bổ nghĩa cho động từ 'explained' cần trạng từ so sánh hơn nối với người được so sánh.",
+    whyRight: "Cụm từ đúng là 'more clearly than my brother'."
+  },
+  {
+    id: 47,
+    section: "Exercise 2: Adverb Sentence Transformation",
+    text: "4. My cousin is a better singer than I am. (well)<br>➔ My cousin sings ___________________",
+    type: "fill",
+    answer: "better than me",
+    cleanAnswer: "better than me",
+    theory: "Dùng dạng so sánh hơn của trạng từ trong ngoặc bổ nghĩa cho động từ hát ('sings').",
+    whyWrong: "Trạng từ trong ngoặc có dạng so sánh hơn đặc biệt, nối với tân ngữ so sánh.",
+    whyRight: "Cụm từ hoàn chỉnh là 'better than me'."
+  },
+  {
+    id: 48,
+    section: "Exercise 2: Adverb Sentence Transformation",
+    text: "5. Phong is a faster swimmer than Phuc. (fast)<br>➔ Phong swims ___________________",
+    type: "fill",
+    answer: "faster than Phuc",
+    cleanAnswer: "faster than phuc",
+    theory: "Chuyển tính từ so sánh sang trạng từ ngắn so sánh hơn bổ nghĩa cho động từ bơi ('swims').",
+    whyWrong: "Từ trong ngoặc là từ ngắn giữ nguyên dạng trạng từ, thêm đuôi so sánh hơn và đối tượng.",
+    whyRight: "Cụm từ đúng là 'faster than Phuc'."
+  },
+
+  // --- Exercise 3: Viết lại câu không đổi nghĩa (1 - 22) ---
+  {
+    id: 49,
+    section: "Exercise 3: Sentence Transformation",
+    text: "1. Tim is older than Sarah.<br>➔ Sarah ___________________",
+    type: "fill",
+    answer: "is younger than Tim",
+    cleanAnswer: "is younger than tim",
+    theory: "Đảo chủ ngữ câu so sánh hơn: Sử dụng tính từ mang ý nghĩa trái ngược với 'older than'.",
+    whyWrong: "Nếu đối tượng A già/lớn tuổi hơn đối tượng B, thì đối tượng B sẽ trẻ hơn đối tượng A.",
+    whyRight: "Sarah 'is younger than Tim'."
+  },
+  {
+    id: 50,
+    section: "Exercise 3: Sentence Transformation",
+    text: "2. Our house is larger than yours.<br>➔ Your house ___________________",
+    type: "fill",
+    answer: "is smaller than ours",
+    cleanAnswer: "is smaller than ours",
+    theory: "Đảo chủ ngữ câu so sánh hơn: Sử dụng tính từ mang nghĩa trái ngược với 'larger than' (rộng hơn).",
+    whyWrong: "Nếu nhà của A rộng hơn nhà của B, thì nhà của B sẽ nhỏ hơn nhà của A.",
+    whyRight: "Your house 'is smaller than ours'."
+  },
+  {
+    id: 51,
+    section: "Exercise 3: Sentence Transformation",
+    text: "3. Bill is not as tall as David.<br>➔ Bill ___________________",
+    type: "fill",
+    answer: "is shorter than David",
+    cleanAnswer: "is shorter than david",
+    theory: "Chuyển từ câu so sánh không bằng ('not as tall as') sang câu so sánh hơn với tính từ trái nghĩa.",
+    whyWrong: "Không cao bằng đồng nghĩa với việc thấp hơn người đó.",
+    whyRight: "Bill 'is shorter than David'."
+  },
+  {
+    id: 52,
+    section: "Exercise 3: Sentence Transformation",
+    text: "4. Jack’s marks are worse than mine.<br>➔ My marks ___________________",
+    type: "fill",
+    answer: "are better than Jack's",
+    cleanAnswer: "are better than jack's",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'worse than' (kém hơn/tệ hơn).",
+    whyWrong: "Điểm của A kém hơn điểm của B nghĩa là điểm của B tốt hơn điểm của A.",
+    whyRight: "My marks 'are better than Jack's'."
+  },
+  {
+    id: 53,
+    section: "Exercise 3: Sentence Transformation",
+    text: "5. This book is the same price as that one.<br>➔ That book is ___________________",
+    type: "fill",
+    answer: "as expensive as this one",
+    cleanAnswer: "as expensive as this one",
+    theory: "Chuyển từ cấu trúc cùng giá tiền ('the same price as') sang cấu trúc so sánh bằng với tính từ chỉ giá cả.",
+    whyWrong: "Cùng mức giá tương đương với cấu trúc so sánh bằng 'as... as' với tính từ chỉ giá trị.",
+    whyRight: "That book is 'as expensive as this one'."
+  },
+  {
+    id: 54,
+    section: "Exercise 3: Sentence Transformation",
+    text: "6. Your bike is slower than mine.<br>➔ My bike is ___________________",
+    type: "fill",
+    answer: "faster than yours",
+    cleanAnswer: "faster than yours",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'slower than' (chậm hơn).",
+    whyWrong: "Xe của A chậm hơn xe của B nghĩa là xe của B nhanh hơn xe của A.",
+    whyRight: "My bike is 'faster than yours'."
+  },
+  {
+    id: 55,
+    section: "Exercise 3: Sentence Transformation",
+    text: "7. My house is bigger than your house.<br>➔ Your house ___________________",
+    type: "fill",
+    answer: "is smaller than my house",
+    cleanAnswer: "is smaller than my house",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'bigger than' (to hơn).",
+    whyWrong: "Nhà của A to hơn nhà của B nghĩa là nhà của B nhỏ hơn nhà của A.",
+    whyRight: "Your house 'is smaller than my house'."
+  },
+  {
+    id: 56,
+    section: "Exercise 3: Sentence Transformation",
+    text: "8. The black car is cheaper than the red car.<br>➔ The red car ___________________",
+    type: "fill",
+    answer: "is more expensive than the black car",
+    cleanAnswer: "is more expensive than the black car",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'cheaper than' (rẻ hơn).",
+    whyWrong: "Vật A rẻ hơn vật B nghĩa là vật B đắt hơn vật A.",
+    whyRight: "The red car 'is more expensive than the black car'."
+  },
+  {
+    id: 57,
+    section: "Exercise 3: Sentence Transformation",
+    text: "9. This film is more interesting than that one.<br>➔ That film ___________________",
+    type: "fill",
+    answer: "is more boring than this one",
+    cleanAnswer: "is more boring than this one",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'more interesting than' (thú vị hơn).",
+    whyWrong: "Bộ phim A thú vị hơn bộ phim B nghĩa là bộ phim B nhàm chán hơn bộ phim A.",
+    whyRight: "That film 'is more boring than this one'."
+  },
+  {
+    id: 58,
+    section: "Exercise 3: Sentence Transformation",
+    text: "10. My kitchen is smaller than yours.<br>➔ Your kitchen ___________________",
+    type: "fill",
+    answer: "is bigger than mine",
+    cleanAnswer: "is bigger than mine",
+    theory: "Đảo chủ ngữ: Sử dụng tính từ mang ý nghĩa trái ngược với 'smaller than' (nhỏ hơn).",
+    whyWrong: "Căn bếp của A nhỏ hơn căn bếp của B nghĩa là căn bếp của B to/rộng hơn căn bếp của A.",
+    whyRight: "Your kitchen 'is bigger than mine'."
+  },
+  {
+    id: 59,
+    section: "Exercise 3: Sentence Transformation",
+    text: "11. My mother cannot cook as well as me.<br>➔ I can ___________________",
+    type: "fill",
+    answer: "cook better than my mother",
+    cleanAnswer: "cook better than my mother",
+    theory: "Chuyển từ câu phủ định so sánh bằng ('cannot cook as well as') sang câu khẳng định so sánh hơn.",
+    whyWrong: "Người A không thể nấu ngon bằng người B nghĩa là người B nấu ngon hơn người A.",
+    whyRight: "I can 'cook better than my mother'."
+  },
+  {
+    id: 60,
+    section: "Exercise 3: Sentence Transformation",
+    text: "12. She has a house which is not as modern as my house.<br>➔ My house ___________________",
+    type: "fill",
+    answer: "is more modern than hers",
+    cleanAnswer: "is more modern than hers",
+    theory: "Chuyển từ so sánh không bằng ('not as modern as') sang so sánh hơn của tính từ dài.",
+    whyWrong: "Ngôi nhà của người đó không hiện đại bằng nhà tôi nghĩa là nhà tôi hiện đại hơn nhà của người đó.",
+    whyRight: "My house 'is more modern than hers'."
+  }
+];
+
+/* =========================================================================
+   2. APP STATE MANAGEMENT & CORE LOGIC
+   ========================================================================= */
+let studentName = "";
+let currentIndex = 0;
+let answeredCorrectly = new Set();
+let firstTryWrong = new Set();
+let studentAnswers = {}; 
+let selectedOption = null;
+
+function startApp() {
+  const input = document.getElementById("studentNameInput");
+  const name = input.value.trim();
+  if (!name) {
+    alert("Vui lòng nhập tên của học sinh để bắt đầu!");
+    input.focus();
+    return;
+  }
+  studentName = name;
+  document.getElementById("studentDisplay").innerText = `Học sinh: ${studentName}`;
+  document.getElementById("reportStudentName").innerText = `Báo Cáo: ${studentName}`;
+  
+  document.getElementById("headerNav").style.display = "flex";
+  document.getElementById("progressBarWrapper").style.display = "block";
+  
+  populateDropdown();
+  showScreen("screen-quiz");
+  loadQuestion(0);
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(screenId).classList.add("active");
+}
+
+function populateDropdown() {
+  const dropdown = document.getElementById("questionDropdown");
+  dropdown.innerHTML = "";
+  allQuestions.forEach((q, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    const isDone = answeredCorrectly.has(idx);
+    opt.textContent = `Câu ${idx + 1} ${isDone ? "✅" : ""}`;
+    dropdown.appendChild(opt);
+  });
+}
+
+function updateProgress() {
+  const total = allQuestions.length;
+  const doneCount = answeredCorrectly.size;
+  document.getElementById("progressBadge").innerText = `Tiến độ: ${doneCount}/${total}`;
+  const pct = (doneCount / total) * 100;
+  document.getElementById("progressBarFill").style.width = `${pct}%`;
+  populateDropdown();
+  document.getElementById("questionDropdown").value = currentIndex;
+
+  if (doneCount === total) {
+    document.getElementById("btnFinish").style.display = "inline-flex";
+  }
+}
+
+function jumpToQuestion(index) {
+  loadQuestion(parseInt(index));
+}
+
+function loadQuestion(idx) {
+  currentIndex = idx;
+  selectedOption = null;
+  const q = allQuestions[idx];
+
+  document.getElementById("exerciseBadge").innerText = q.section;
+  document.getElementById("questionTitle").innerHTML = q.text;
+  document.getElementById("theoryContent").innerHTML = q.theory;
+
+  const area = document.getElementById("interactionArea");
+  area.innerHTML = "";
+
+  if (q.type === "mcq") {
+    const list = document.createElement("div");
+    list.className = "options-list";
+    q.options.forEach(opt => {
+      const item = document.createElement("div");
+      item.className = "option-item";
+      
+      const keySpan = document.createElement("span");
+      keySpan.className = "option-key";
+      keySpan.innerText = opt.charAt(0);
+
+      const textSpan = document.createElement("span");
+      textSpan.innerText = opt.length > 2 && opt.charAt(1) === '.' ? opt.substring(3) : opt;
+
+      item.appendChild(keySpan);
+      item.appendChild(textSpan);
+
+      item.onclick = () => {
+        document.querySelectorAll(".option-item").forEach(el => el.classList.remove("selected"));
+        item.classList.add("selected");
+        selectedOption = opt;
+      };
+
+      if (studentAnswers[q.id] === opt) {
+        item.classList.add("selected");
+        selectedOption = opt;
+      }
+
+      list.appendChild(item);
+    });
+    area.appendChild(list);
+  } else {
+    const box = document.createElement("div");
+    box.className = "fill-box";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "fill-input";
+    input.id = "userFillInput";
+    input.placeholder = "Nhập câu trả lời hoặc từ thích hợp vào đây...";
+    input.autocomplete = "off";
+    if (studentAnswers[q.id]) {
+      input.value = studentAnswers[q.id];
+    }
+    input.onkeypress = (e) => {
+      if (e.key === "Enter") {
+        checkCurrentAnswer();
+      }
+    };
+    box.appendChild(input);
+    area.appendChild(box);
+    setTimeout(() => input.focus(), 100);
+  }
+
+  document.getElementById("btnPrev").disabled = (currentIndex === 0);
+  updateProgress();
+}
+
+function normalizeStr(str) {
+  return str.toLowerCase().replace(/['".,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function checkCurrentAnswer() {
+  const q = allQuestions[currentIndex];
+  let userAns = "";
+
+  if (q.type === "mcq") {
+    if (!selectedOption) {
+      alert("Vui lòng chọn 1 đáp án trước khi kiểm tra!");
+      return;
+    }
+    userAns = selectedOption;
+  } else {
+    const input = document.getElementById("userFillInput");
+    userAns = input ? input.value.trim() : "";
+    if (!userAns) {
+      alert("Vui lòng nhập câu trả lời của bạn!");
+      return;
+    }
+  }
+
+  studentAnswers[q.id] = userAns;
+
+  let isCorrect = false;
+  const normUser = normalizeStr(userAns);
+  const normTarget = normalizeStr(q.cleanAnswer || q.answer);
+
+  if (q.type === "mcq") {
+    if (userAns === q.answer || normUser === normTarget || normUser.includes(normTarget)) {
+      isCorrect = true;
+    }
+  } else {
+    if (normUser === normTarget) {
+      isCorrect = true;
+    } else if (normTarget.includes("than") && normUser.includes(normTarget.split("than")[0].trim())) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("younger") && (normUser.includes("younger than") || normUser.includes("not as old as"))) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("smaller") && (normUser.includes("smaller than") || normUser.includes("not as large as") || normUser.includes("not as big as"))) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("more expensive") && normUser.includes("more expensive than")) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("more boring") && (normUser.includes("more boring than") || normUser.includes("not as interesting as"))) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("cook better") && normUser.includes("cook better than")) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("more modern") && normUser.includes("more modern than")) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("faster than") && normUser.includes("faster than")) {
+      isCorrect = true;
+    } else if (q.cleanAnswer.includes("better than") && normUser.includes("better than")) {
+      isCorrect = true;
+    }
+  }
+
+  if (isCorrect) {
+    answeredCorrectly.add(currentIndex);
+    document.getElementById("successDesc").innerHTML = `
+      <strong>Đáp án chính xác:</strong> ${q.answer}<br><br>
+      <strong>Lý do:</strong> ${q.whyRight}
+    `;
+    document.getElementById("successModal").classList.add("show");
+  } else {
+    firstTryWrong.add(currentIndex);
+    document.getElementById("errorDesc").innerHTML = `
+      <strong>Câu trả lời của bạn:</strong> <span style="color: var(--error);">${userAns}</span><br><br>
+      <strong>Nguyên nhân chưa đúng:</strong><br>${q.whyWrong}
+    `;
+    document.getElementById("errorModal").classList.add("show");
+  }
+
+  updateProgress();
+}
+
+function closeSuccessAndProceed() {
+  document.getElementById("successModal").classList.remove("show");
+  
+  let nextIdx = -1;
+  for (let i = 0; i < allQuestions.length; i++) {
+    if (!answeredCorrectly.has(i)) {
+      nextIdx = i;
+      break;
+    }
+  }
+
+  if (nextIdx !== -1) {
+    loadQuestion(nextIdx);
+  } else {
+    showReportScreen();
+  }
+}
+
+function closeErrorAndRetry() {
+  document.getElementById("errorModal").classList.remove("show");
+  const input = document.getElementById("userFillInput");
+  if (input) {
+    input.focus();
+    input.select();
+  }
+}
+
+function navigatePrev() {
+  if (currentIndex > 0) {
+    loadQuestion(currentIndex - 1);
+  }
+}
+
+/* =========================================================================
+   3. BÁO CÁO TỔNG KẾT & TÍNH NĂNG XUẤT FILE PDF
+   ========================================================================= */
+function showReportScreen() {
+  showScreen("screen-report");
+  document.getElementById("headerNav").style.display = "none";
+  document.getElementById("progressBarWrapper").style.display = "none";
+
+  const total = allQuestions.length;
+  const wrongCount = firstTryWrong.size;
+  const firstCorrectCount = total - wrongCount;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('vi-VN') + " " + now.toLocaleTimeString('vi-VN');
+  document.getElementById("reportTimestamp").innerText = `Thời gian hoàn thành: ${dateStr}`;
+
+  document.getElementById("statTotal").innerText = total;
+  document.getElementById("statFirstCorrect").innerText = firstCorrectCount;
+  document.getElementById("statNeedReview").innerText = wrongCount;
+
+  const tbody = document.getElementById("reportBody");
+  tbody.innerHTML = "";
+
+  const wrongDetailsList = [];
+
+  allQuestions.forEach((q, idx) => {
+    const tr = document.createElement("tr");
+    const wasWrong = firstTryWrong.has(idx);
+    const userFinal = studentAnswers[q.id] || "Không xác định";
+
+    if (wasWrong) {
+      wrongDetailsList.push({
+        questionNumber: idx + 1,
+        questionText: q.text.replace(/<[^>]*>?/gm, ''),
+        userAnswer: userFinal,
+        correctAnswer: q.answer
+      });
+    }
+
+    tr.innerHTML = `
+      <td style="font-weight: 800; text-align: center;">${idx + 1}</td>
+      <td>${q.text.replace('<br>', ' ')}</td>
+      <td>${wasWrong ? `<span class="tag-wrong">${userFinal} (sai lần 1)</span>` : '<span style="color: #64748B;">-- (Đúng ngay lần 1)</span>'}</td>
+      <td><span class="tag-correct">${q.answer}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Đồng bộ lên Google Sheet
+  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("DÁN_URL")) {
+    const syncMsg = document.getElementById("syncMsg");
+    if (syncMsg) syncMsg.innerText = "⏳ Đang lưu kết quả vào Google Sheets...";
+
+    const payload = {
+      studentName: studentName,
+      totalQuestions: total,
+      firstCorrectCount: firstCorrectCount,
+      wrongCount: wrongCount,
+      wrongDetails: wrongDetailsList
+    };
+
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (syncMsg) syncMsg.innerText = "✅ Đã lưu kết quả thành công vào Google Sheets!";
+    })
+    .catch(err => {
+      console.error("Lỗi khi gửi kết quả lên Google Sheet:", err);
+      if (syncMsg) syncMsg.innerText = "⚠️ Chưa thể lưu lên Google Sheets (vui lòng kiểm tra lại URL).";
+    });
+  }
+}
+
+function exportToPDF() {
+  const element = document.getElementById('pdfReportContent');
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: `Ket_Qua_${studentName.replace(/\\s+/g, '_')}_SoSanh.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  
+  html2pdf().set(opt).from(element).save();
+}
+
+function restartApp() {
+  answeredCorrectly.clear();
+  firstTryWrong.clear();
+  studentAnswers = {};
+  currentIndex = 0;
+  selectedOption = null;
+  document.getElementById("btnFinish").style.display = "none";
+  showScreen("screen-start");
+}
+</script>
+
+</body>
+</html>
